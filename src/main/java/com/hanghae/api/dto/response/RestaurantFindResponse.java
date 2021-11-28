@@ -4,6 +4,7 @@ import com.hanghae.api.model.Restaurant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class RestaurantFindResponse {
 
     private Long id;

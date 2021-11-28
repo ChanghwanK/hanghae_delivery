@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table (name = "order_line")
+@Table(name = "ORDER_LINE")
 public class OrderLine {
 
     @Id
@@ -28,6 +28,7 @@ public class OrderLine {
     private Long foodId;
 
     private Integer quantity;
+
 
     public OrderLine ( Long foodId, Integer quantity ) {
         this.foodId = foodId;

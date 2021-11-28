@@ -19,11 +19,10 @@ import lombok.NoArgsConstructor;
  * @Date: 2021/11/28
  */
 
-
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "order")
+@Table(name = "ORDER_TBL")
 public class Order {
 
     @Id

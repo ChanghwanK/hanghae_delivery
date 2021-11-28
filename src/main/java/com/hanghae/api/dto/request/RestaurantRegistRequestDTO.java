@@ -16,20 +16,21 @@ import lombok.NoArgsConstructor;
 @Getter
 public class RestaurantRegistRequestDTO {
 
-    private static final Integer MIN_ORDER_PRICE = 1000;
-    private static final Integer MAX_ORDER_PRICE = 100000;
-    private static final Integer MIN_DELIVERY_PRICE = 0;
-    private static final Integer MAX_DELIVERY_PRICE = 10000;
-
     @NotBlank
     private String name;
 
-    @Min(MIN_ORDER_PRICE)
-    @Max (MAX_ORDER_PRICE)
+    @Min(1000)
+    @Max (100000)
     private Integer minOrderPrice;
 
-    @Min(MIN_DELIVERY_PRICE)
-    @Max(MAX_DELIVERY_PRICE)
+    @Min(0)
+    @Max(10000)
     private Integer deliveryFee;
 
+    public RestaurantRegistRequestDTO ( String name, Integer minOrderPrice,
+        Integer deliveryFee ) {
+        this.name = name;
+        this.minOrderPrice = minOrderPrice;
+        this.deliveryFee = deliveryFee;
+    }
 }
