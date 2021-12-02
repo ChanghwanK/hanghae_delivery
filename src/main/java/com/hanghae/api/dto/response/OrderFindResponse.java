@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  */
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
-public class OrderFindResponseDTO {
+public class OrderFindResponse {
 
     private Long orderId;
     private Long restaurantId;
@@ -19,25 +19,21 @@ public class OrderFindResponseDTO {
     private Integer deliveryFee;
     private Integer totalPrice;
 
-    public OrderFindResponseDTO ( Long orderId, Long restaurantId,
-        List<OrderFoodListResponse> foods, Integer deliveryFee, Integer totalPrice ) {
-        this.orderId = orderId;
-        this.restaurantId = restaurantId;
-        this.foods = foods;
-        this.deliveryFee = deliveryFee;
-        this.totalPrice = totalPrice;
+    public OrderFindResponse (Long orderId, Long restaurantId, List<OrderFoodListResponse> foods,
+        Integer deliveryFee, Integer totalPrice) {
+        this.orderId = orderId; this.restaurantId = restaurantId; this.foods = foods;
+        this.deliveryFee = deliveryFee; this.totalPrice = totalPrice;
     }
 
     @Getter
     public static class OrderFoodListResponse {
+
         private Long foodId;
         private Integer quantity;
         private Integer price;
 
-        public OrderFoodListResponse ( Long foodId, Integer quantity, Integer price ) {
-            this.foodId = foodId;
-            this.quantity = quantity;
-            this.price = price;
+        public OrderFoodListResponse (Long foodId, Integer quantity, Integer price) {
+            this.foodId = foodId; this.quantity = quantity; this.price = price;
         }
     }
 }

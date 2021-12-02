@@ -1,24 +1,22 @@
 package com.hanghae.api.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.hanghae.api.dto.request.FoodRegistRequestDTO;
-import com.hanghae.api.dto.request.RestaurantRegistRequestDTO;
+import com.hanghae.api.dto.request.FoodRegistRequestDto;
+import com.hanghae.api.dto.request.RestaurantRegistRequestDto;
 import com.hanghae.api.dto.response.RestaurantFindResponse;
-import com.hanghae.api.model.Food;
 import com.hanghae.api.model.Restaurant;
 import com.hanghae.api.repository.FoodRepository;
 import com.hanghae.api.repository.RestaurantRepository;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.Table;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -52,7 +50,7 @@ class RestaurantServiceTest {
         Integer deliveryFee = 2000;
 
 
-        RestaurantRegistRequestDTO restaurantRegistRequestDTO = new RestaurantRegistRequestDTO(
+        RestaurantRegistRequestDto restaurantRegistRequestDTO = new RestaurantRegistRequestDto(
             restaurantName,
             minOrderPrice,
             deliveryFee
@@ -71,7 +69,7 @@ class RestaurantServiceTest {
         String foodName = "쉑버거 더블";
         Integer price = 10900;
 
-        FoodRegistRequestDTO foodRegistRequestDTO = new FoodRegistRequestDTO(
+        FoodRegistRequestDto foodRegistRequestDTO = new FoodRegistRequestDto(
             foodName,
             price
         );

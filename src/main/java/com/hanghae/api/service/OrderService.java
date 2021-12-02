@@ -1,33 +1,29 @@
 package com.hanghae.api.service;
 
-import com.hanghae.api.dto.request.OrderRequestDTO;
-import com.hanghae.api.dto.request.OrderRequestDTO.OrderFood;
-import com.hanghae.api.dto.response.OrderFindResponseDTO;
-import com.hanghae.api.dto.response.OrderFindResponseDTO.OrderFoodListResponse;
-import com.hanghae.api.dto.response.OrderResponseDTO;
+import com.hanghae.api.dto.request.OrderRequestDto;
+import com.hanghae.api.dto.response.OrderFindResponse;
+import com.hanghae.api.dto.response.OrderFoodInfo;
+import com.hanghae.api.dto.response.OrderResponse;
 import com.hanghae.api.exception.FoodNotFoundException;
-import com.hanghae.api.exception.OrderNotFoundException;
 import com.hanghae.api.exception.RestaurantNotFoundException;
-import com.hanghae.api.exception.TotalOrderPriceNotValidateException;
 import com.hanghae.api.model.Food;
 import com.hanghae.api.model.Order;
 import com.hanghae.api.model.OrderLine;
 import com.hanghae.api.model.Restaurant;
 import com.hanghae.api.repository.FoodRepository;
+import com.hanghae.api.repository.OrderLineRepository;
 import com.hanghae.api.repository.OrderRepository;
 import com.hanghae.api.repository.RestaurantRepository;
-import java.nio.file.ReadOnlyFileSystemException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * @Created by Bloo
- * @Date: 2021/11/28
- */
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class OrderService {
@@ -35,84 +31,96 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final FoodRepository foodRepository;
     private final RestaurantRepository restaurantRepository;
+    private final OrderLineRepository orderLineRepository;
 
 
     @Transactional
-    public OrderResponseDTO registNewOrder ( OrderRequestDTO orderRequestDTO ) {
+    public OrderResponse registNewOrder (OrderRequestDto orderRequestDto) {
 
-        Long restaurantId = orderRequestDTO.getRestaurantId();
-
-        restaurantRepository.findById(restaurantId)
-            .orElseThrow(ReadOnlyFileSystemException::new);
-
-        List<OrderFood> orderFoods = orderRequestDTO.getOrderFoods();
-
-        ArrayList<OrderLine> orderLines = new ArrayList<>();
-        Integer totalPrice = 0;
-
-        for ( OrderFood orderFood : orderFoods ) {
-
-            OrderLine orderLine = new OrderLine(
-                orderFood.getFoodId(),
-                orderFood.getQuantity()
-            );
-
-            orderLines.add(orderLine);
-
-            Food food = foodRepository.findById(orderFood.getFoodId())
-                .orElseThrow(FoodNotFoundException::new);
-
-            totalPrice += orderFood.calculatePrice(food);
-        }
-
-        if ( totalPrice > 0 ) {
-            Order order = new Order(restaurantId, totalPrice, orderLines);
-            Long orderId = orderRepository.save(order).getId();
-            return new OrderResponseDTO(orderId);
-        } else {
-            throw new TotalOrderPriceNotValidateException();
-        }
-    }
-
-    @Transactional (readOnly = true)
-    public OrderFindResponseDTO findOrderById ( Long orderId ) {
-
-        Order order = orderRepository.findById(orderId)
-            .orElseThrow(OrderNotFoundException::new);
-
-        Long restaurantId = order.getRestaurantId();
+        Long restaurantId = orderRequestDto.getRestaurantId();
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
             .orElseThrow(RestaurantNotFoundException::new);
 
-        Integer deliveryFee = restaurant.getDeliveryFee();
-        Integer totalPrice = order.getTotalPrice();
-        List<OrderLine> orderLines = order.getOrderLines();
-        List<OrderFoodListResponse> orderFoodListResponses = new ArrayList<>();
+        List<OrderLine> orderLines = getOrderLines(orderRequestDto);
 
-        for ( OrderLine orderLine : orderLines ) {
+        int totalPrice = getTotalPrice(orderLines);
 
-            Long fooId = orderLine.getFoodId();
-            Integer quantity = orderLine.getQuantity();
+        Order order = createOrderAndSetRelation(totalPrice, restaurant, orderLines);
+        orderRepository.save(order);
 
-            Food food = foodRepository.findById(fooId)
-                .orElseThrow(FoodNotFoundException::new);
 
-            OrderFoodListResponse orderFindResponse = new OrderFoodListResponse(
-                fooId,
-                quantity,
-                food.getPrice()
-            );
+        return OrderResponse.of(
+            restaurant,
+            totalPrice,
+            createOrderInfos(orderLines)
+        );
+    }
 
-            orderFoodListResponses.add(orderFindResponse);
+    @Transactional(readOnly = true)
+    public List<OrderResponse> findAllOrder () {
+
+        ArrayList<OrderResponse> orderResponses = new ArrayList<>();
+        List<Order> orders = orderRepository.findAll();
+
+        for(Order order : orders) {
+
+            Restaurant restaurant = order.getRestaurant();
+            int totalPrice = order.getTotalPrice();
+            List<OrderLine> orderLines = orderLineRepository.findAllByOrder(order);
+            List<OrderFoodInfo> orderInfos = createOrderInfos(orderLines);
+
+            orderResponses.add(OrderResponse.of(restaurant, totalPrice, orderInfos));
         }
 
-        return new OrderFindResponseDTO(
-            orderId,
-            restaurantId,
-            orderFoodListResponses,
-            deliveryFee,
-            totalPrice
-        );
+        return orderResponses;
+    }
+
+    private int getTotalPrice (List<OrderLine> orderLines) {
+        int totalPrice = 0;
+
+        for(OrderLine orderLine : orderLines) {
+
+            Long foodId = orderLine.getFoodId(); Food food = findFoodById(foodId);
+
+            int orderLineUnitPrice = (food.getPrice() * orderLine.getQuantity());
+            totalPrice += orderLineUnitPrice;
+        } return totalPrice;
+    }
+
+    private List<OrderLine> getOrderLines (OrderRequestDto orderRequestDto) {
+        return orderRequestDto.getOrderFoodInfos()
+            .stream()
+            .map(OrderLine::of)
+            .collect(Collectors.toList());
+    }
+
+
+    private Order createOrderAndSetRelation (int totalPrice, Restaurant restaurant, List<OrderLine> orderLines) {
+        Order order = Order.getDefaultOrderInstance();
+        order.setTotalPriceAndCheckTotalPriceIsValid(totalPrice);
+        order.setRelationWithOrderLines(orderLines); order.setRelationWithRestaurant(restaurant);
+        return order;
+    }
+
+
+    private List<OrderFoodInfo> createOrderInfos (List<OrderLine> orderLines) {
+
+        ArrayList<OrderFoodInfo> orderFoodInfos = new ArrayList<>();
+
+        for(OrderLine orderLine : orderLines) {
+            Long foodId = orderLine.getFoodId(); Food food = findFoodById(foodId);
+
+            OrderFoodInfo foodInfo = OrderFoodInfo.builder().name(food.getName())
+                .quantity(orderLine.getQuantity()).price(food.getPrice()).build();
+
+            orderFoodInfos.add(foodInfo);
+        }
+
+        return orderFoodInfos;
+    }
+
+    private Food findFoodById (Long foodId) {
+        return foodRepository.findById(foodId).orElseThrow(FoodNotFoundException::new);
     }
 }

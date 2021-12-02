@@ -1,7 +1,7 @@
 package com.hanghae.api.service;
 
-import com.hanghae.api.dto.request.FoodRegistRequestDTO;
-import com.hanghae.api.dto.request.RestaurantRegistRequestDTO;
+import com.hanghae.api.dto.request.FoodRegistRequestDto;
+import com.hanghae.api.dto.request.RestaurantRegistRequestDto;
 import com.hanghae.api.dto.response.RestaurantFindResponse;
 import com.hanghae.api.exception.RestaurantNotFoundException;
 import com.hanghae.api.model.Food;
@@ -27,7 +27,10 @@ public class RestaurantService {
     private final FoodRepository foodRepository;
 
     @Transactional
-    public void registRestaurant ( RestaurantRegistRequestDTO restaurantRegistRequestDTO ) {
+    public Restaurant registRestaurant ( RestaurantRegistRequestDto restaurantRegistRequestDTO ) {
+
+        restaurantRegistRequestDTO.checkMinOrderIs100unit();
+        restaurantRegistRequestDTO.checkDeliverFeeIs500unit();
 
         Restaurant restaurant = new Restaurant(
             restaurantRegistRequestDTO.getName(),
@@ -35,29 +38,10 @@ public class RestaurantService {
             restaurantRegistRequestDTO.getDeliveryFee()
         );
 
-        restaurant.checkValidationOrderPrice();
-        restaurant.checkValidationDefaultDeliveryFee();
-
-        restaurantRepository.save(restaurant);
+        return restaurantRepository.save(restaurant);
     }
 
-    @Transactional
-    public void registFood ( Long restaurantId, FoodRegistRequestDTO foodRegistRequestDTO ) {
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-            .orElseThrow(RestaurantNotFoundException::new);
-
-        String restaurantName= restaurant.getName();
-
-        Food food = new Food(
-            foodRegistRequestDTO.getName(),
-            foodRegistRequestDTO.getPrice(),
-            restaurantName
-        );
-
-        foodRepository.save(food);
-    }
-
-    @Transactional(readOnly = true)
+    @Transactional (readOnly = true)
     public List<RestaurantFindResponse> findAllRestaurants () {
         List<Restaurant> restaurants = restaurantRepository.findAll();
         return RestaurantFindResponse.listOf(restaurants);
