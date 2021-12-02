@@ -1,9 +1,10 @@
 package com.hanghae.api.controller;
 
-import com.hanghae.api.dto.request.OrderRequestDTO;
-import com.hanghae.api.dto.response.OrderFindResponseDTO;
-import com.hanghae.api.dto.response.OrderResponseDTO;
+import com.hanghae.api.dto.request.OrderRequestDto;
+import com.hanghae.api.dto.response.OrderFindResponse;
+import com.hanghae.api.dto.response.OrderResponse;
 import com.hanghae.api.service.OrderService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,14 +24,15 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @PostMapping ("/api/user/order")
-    public ResponseEntity<OrderResponseDTO> registNewOrder (
-        @RequestBody OrderRequestDTO orderRequestDTO ) {
-        return ResponseEntity.ok().body(orderService.registNewOrder(orderRequestDTO));
+    @PostMapping("/order/request")
+    public ResponseEntity<OrderResponse> registNewOrder (
+        @RequestBody OrderRequestDto orderRequestDto) {
+        return ResponseEntity.ok().body(orderService.registNewOrder(orderRequestDto));
     }
 
-    @GetMapping ("/api/user/order/{orderId}")
-    public ResponseEntity<OrderFindResponseDTO> findOrderById ( @PathVariable (name = "orderId") Long id ) {
-        return ResponseEntity.ok().body(orderService.findOrderById(id));
+    @GetMapping("/orders")
+    public ResponseEntity<List<OrderResponse>> findOrderById (
+        @PathVariable(name = "orderId") Long id) {
+        return ResponseEntity.ok().body(orderService.findAllOrder());
     }
 }

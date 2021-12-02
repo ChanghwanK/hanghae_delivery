@@ -4,6 +4,7 @@ import com.hanghae.api.model.Restaurant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class RestaurantFindResponse {
 
     private Long id;
@@ -20,28 +22,25 @@ public class RestaurantFindResponse {
     private Integer minOrderPrice;
     private Integer deliveryFee;
 
-    public RestaurantFindResponse ( Long id, String name, Integer minOrderPrice,
-        Integer deliveryFee ) {
-        this.id = id;
-        this.name = name;
-        this.minOrderPrice = minOrderPrice;
+    public RestaurantFindResponse (Long id, String name, Integer minOrderPrice,
+        Integer deliveryFee) {
+        this.id = id; this.name = name; this.minOrderPrice = minOrderPrice;
         this.deliveryFee = deliveryFee;
     }
 
     public static List<RestaurantFindResponse> listOf (List<Restaurant> restaurants) {
         ArrayList<RestaurantFindResponse> restaurantFindResponses = new ArrayList<>();
 
-        for ( Restaurant restaurant : restaurants) {
+        for(Restaurant restaurant : restaurants) {
             RestaurantFindResponse restaurantFindResponse = new RestaurantFindResponse(
                 restaurant.getId(),
                 restaurant.getName(),
                 restaurant.getMinOrderPrice(),
                 restaurant.getMinOrderPrice()
             );
-
             restaurantFindResponses.add(restaurantFindResponse);
         }
 
-        return  restaurantFindResponses;
+        return restaurantFindResponses;
     }
 }

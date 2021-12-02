@@ -1,46 +1,67 @@
 package com.hanghae.api.model;
 
+import com.hanghae.api.exception.OrderLineNotValidException;
+import com.hanghae.api.exception.TotalOrderPriceNotValidateException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * @Created by Bloo
- * @Date: 2021/11/28
- */
-
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table(name = "order")
+@Table(name = "ORDER_TBL")
 public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
 
-    @JoinColumn(name = "restaurant_id")
-    private Long restaurantId;
+    private int totalPrice;
 
-    private Integer totalPrice;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Restaurant restaurant;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<OrderLine> orderLines = new ArrayList<>();
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "orderId", cascade = CascadeType.ALL)
+    private final List<OrderLine> orderLines = new ArrayList<>();
 
-    public Order (Long restaurantId, Integer totalPrice ,List<OrderLine> orderLines ) {
-        this.restaurantId = restaurantId;
-        this.totalPrice = totalPrice;
-        this.orderLines = orderLines;
+    public static Order getDefaultOrderInstance () {
+        return new Order();
     }
+
+    public void setRelationWithRestaurant (Restaurant restaurant) {
+        this.restaurant = restaurant;
+    }
+
+    public void setRelationWithOrderLines (List<OrderLine> orderLines) {
+
+        if(! orderLines.isEmpty()) {
+            for(OrderLine orderLine : orderLines) {
+                orderLine.registOrder(this);
+            }
+            this.orderLines.addAll(orderLines);
+        } else {
+            throw new OrderLineNotValidException();
+        }
+    }
+
+    public void setTotalPriceAndCheckTotalPriceIsValid (int totalPrice) {
+        if(totalPrice <= 0) {
+            throw new TotalOrderPriceNotValidateException();
+        } else {
+            this.totalPrice = totalPrice;
+        }
+    }
+
 }

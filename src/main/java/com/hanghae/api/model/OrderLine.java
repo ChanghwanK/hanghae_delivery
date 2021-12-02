@@ -1,13 +1,18 @@
 package com.hanghae.api.model;
 
+import com.hanghae.api.dto.request.OrderRequestDto.OrderLineInfo;
+import javax.persistence.CascadeType;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.ManyToOne;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.aspectj.weaver.ast.Or;
 
 /**
  * @Created by Bloo
@@ -18,7 +23,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
-@Table (name = "order_line")
 public class OrderLine {
 
     @Id
@@ -27,10 +31,25 @@ public class OrderLine {
 
     private Long foodId;
 
-    private Integer quantity;
+    private int quantity;
 
-    public OrderLine ( Long foodId, Integer quantity ) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Order order;
+
+    @Builder
+    public OrderLine ( Long foodId, int quantity ) {
         this.foodId = foodId;
         this.quantity = quantity;
+    }
+
+    public void registOrder(Order order) {
+        this.order = order;
+    }
+
+    public static OrderLine of ( OrderLineInfo orderLineInfo) {
+        return OrderLine.builder()
+            .foodId(orderLineInfo.getFoodId())
+            .quantity(orderLineInfo.getQuantity())
+            .build();
     }
 }

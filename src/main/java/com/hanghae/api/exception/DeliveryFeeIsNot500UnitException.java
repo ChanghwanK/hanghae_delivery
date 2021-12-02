@@ -6,10 +6,10 @@ package com.hanghae.api.exception;
  */
 
 
-public class DeliveryFeeNotValidateException extends RuntimeException {
+public class DeliveryFeeIsNot500UnitException extends RuntimeException {
     private final static String MESSAGE = "배달 금액이 유효하지 않습니다.";
 
-    public DeliveryFeeNotValidateException () {
+    public DeliveryFeeIsNot500UnitException () {
         super(MESSAGE);
     }
 }

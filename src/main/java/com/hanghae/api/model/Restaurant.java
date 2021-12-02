@@ -1,22 +1,28 @@
 package com.hanghae.api.model;
 
-import com.hanghae.api.exception.DeliveryFeeNotValidateException;
+import com.hanghae.api.exception.DeliveryFeeIsNot500UnitException;
 import com.hanghae.api.exception.OrderPriceNotValidateException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * @Created by Bloo
  * @Date: 2021/11/28
  */
 
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -40,21 +46,5 @@ public class Restaurant extends BaseTimeEntity {
         this.name = name;
         this.minOrderPrice = minOrderPrice;
         this.deliveryFee = deliveryFee;
-    }
-
-    public void checkValidationOrderPrice () {
-        Integer minOrderPrice = this.minOrderPrice;
-
-        if (minOrderPrice <= 1000 || minOrderPrice >= 100000) {
-            throw new OrderPriceNotValidateException();
-        }
-    }
-
-    public void checkValidationDefaultDeliveryFee () {
-        Integer deliveryFee = this.deliveryFee;
-
-        if (deliveryFee <= 0 || deliveryFee >= 10000) {
-            throw new DeliveryFeeNotValidateException();
-        }
     }
 }
