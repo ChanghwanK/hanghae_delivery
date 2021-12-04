@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class OrderResponse {
 
     private String restaurantName;
-    private List<OrderFoodInfo> orderFoodInfos;
+    private List<OrderFoodInfo> foods;
     private int deliveryFee;
     private int totalPrice;
 
@@ -25,7 +25,7 @@ public class OrderResponse {
 
     public void setOrderFoodInfos (List<OrderFoodInfo> orderFoodInfos) {
         if(! orderFoodInfos.isEmpty()) {
-            this.orderFoodInfos = orderFoodInfos;
+            this.foods = orderFoodInfos;
         } else {
             throw new OrderInfoIsEmptyException();
         }

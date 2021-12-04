@@ -16,8 +16,10 @@ import javax.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Entity
@@ -56,8 +58,8 @@ public class Order {
         }
     }
 
-    public void setTotalPriceAndCheckTotalPriceIsValid (int totalPrice) {
-        if(totalPrice <= 0) {
+    public void setTotalPriceAndCheckTotalPriceIsValid (int totalPrice, int minOrderPrice) {
+        if(totalPrice <= minOrderPrice) {
             throw new TotalOrderPriceNotValidateException();
         } else {
             this.totalPrice = totalPrice;

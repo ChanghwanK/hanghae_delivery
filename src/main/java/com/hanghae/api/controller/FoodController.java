@@ -24,13 +24,8 @@ public class FoodController {
     private final FoodService foodService;
 
     @PostMapping("/restaurant/{restaurantId}/food/register")
-    public ResponseEntity<Void> registRestaurantFood (@PathVariable Long restaurantId,
-        @RequestBody List<FoodRegistRequestDto> foodRegistRequestDtos) {
-
-        for(FoodRegistRequestDto foodRegistRequestDto : foodRegistRequestDtos) {
-            foodService.saveNewFoods(restaurantId, foodRegistRequestDto);
-        }
-
+    public ResponseEntity<Void> registRestaurantFood (@PathVariable Long restaurantId, @RequestBody List<FoodRegistRequestDto> foodRegistRequestDtos) {
+        foodService.saveNewFoods(restaurantId, foodRegistRequestDtos);
         return ResponseEntity.ok().build();
     }
 

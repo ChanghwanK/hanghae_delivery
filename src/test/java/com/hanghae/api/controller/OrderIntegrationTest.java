@@ -2,10 +2,10 @@ package com.hanghae.api.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.hanghae.api.controller.FoodIntegrationTest;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -170,22 +170,22 @@ class OrderIntegrationTest {
         // given
         Long restaurantId = registeredRestaurant.id;
 
-        OrderLineInfo foodOrderRequest1 = OrderLineInfo.builder()
+        FoodOrderRequestDto foodOrderRequest1 = FoodOrderRequestDto.builder()
             .id(food1.id)
             .quantity(1)
             .build();
 
-        OrderLineInfo foodOrderRequest2 = OrderLineInfo.builder()
+        FoodOrderRequestDto foodOrderRequest2 = FoodOrderRequestDto.builder()
             .id(food2.id)
             .quantity(2)
             .build();
 
-        OrderLineInfo foodOrderRequest3 = OrderLineInfo.builder()
+        FoodOrderRequestDto foodOrderRequest3 = FoodOrderRequestDto.builder()
             .id(food3.id)
             .quantity(3)
             .build();
 
-        List<OrderLineInfo> foodOrderRequestDtos = new ArrayList<>();
+        List<FoodOrderRequestDto> foodOrderRequestDtos = new ArrayList<>();
         foodOrderRequestDtos.add(foodOrderRequest1);
         foodOrderRequestDtos.add(foodOrderRequest2);
         foodOrderRequestDtos.add(foodOrderRequest3);
@@ -214,7 +214,7 @@ class OrderIntegrationTest {
         // 음식 주문 확인
         assertEquals(3, orderDto.foods.size());
         // 음식1 주문 확인
-        OrderFoodInfo foodOrder1 = orderDto.foods.stream()
+        FoodOrderDto foodOrder1 = orderDto.foods.stream()
             .filter(foodOrderDto -> foodOrderDto.name.equals(food1.getName()))
             .findAny().orElse(null);
         assertNotNull(foodOrder1);
@@ -222,7 +222,7 @@ class OrderIntegrationTest {
         assertEquals(foodOrder1.quantity, foodOrder1.quantity);
         assertEquals(10900, foodOrder1.price);
         // 음식2 주문 확인
-        OrderFoodInfo foodOrder2 = orderDto.foods.stream()
+        FoodOrderDto foodOrder2 = orderDto.foods.stream()
             .filter(foodOrderDto -> foodOrderDto.name.equals(food2.getName()))
             .findAny().orElse(null);
         assertNotNull(foodOrder2);
@@ -230,7 +230,7 @@ class OrderIntegrationTest {
         assertEquals(foodOrder2.quantity, foodOrder2.quantity);
         assertEquals(9800, foodOrder2.price);
         // 음식3 주문 확인
-        OrderFoodInfo foodOrder3 = orderDto.foods.stream()
+        FoodOrderDto foodOrder3 = orderDto.foods.stream()
             .filter(foodOrderDto -> foodOrderDto.name.equals(food3.getName()))
             .findAny().orElse(null);
         assertNotNull(foodOrder3);
@@ -252,12 +252,12 @@ class OrderIntegrationTest {
         // given
         Long restaurantId = registeredRestaurant.id;
 
-        OrderLineInfo foodOrderRequest1 = OrderLineInfo.builder()
+        FoodOrderRequestDto foodOrderRequest1 = FoodOrderRequestDto.builder()
             .id(food1.id)
             .quantity(0)
             .build();
 
-        List<OrderLineInfo> foodOrderRequestDtos = new ArrayList<>();
+        List<FoodOrderRequestDto> foodOrderRequestDtos = new ArrayList<>();
         foodOrderRequestDtos.add(foodOrderRequest1);
 
         OrderRequestDto orderRequest = OrderRequestDto.builder()
@@ -288,12 +288,12 @@ class OrderIntegrationTest {
         // given
         Long restaurantId = registeredRestaurant.id;
 
-        OrderLineInfo foodOrderRequest1 = OrderLineInfo.builder()
+        FoodOrderRequestDto foodOrderRequest1 = FoodOrderRequestDto.builder()
             .id(food1.id)
             .quantity(101)
             .build();
 
-        List<OrderLineInfo> foodOrderRequestDtos = new ArrayList<>();
+        List<FoodOrderRequestDto> foodOrderRequestDtos = new ArrayList<>();
         foodOrderRequestDtos.add(foodOrderRequest1);
 
         OrderRequestDto orderRequest = OrderRequestDto.builder()
@@ -324,12 +324,12 @@ class OrderIntegrationTest {
         // given
         Long restaurantId = registeredRestaurant.id;
 
-        OrderLineInfo foodOrderRequest1 = OrderLineInfo.builder()
+        FoodOrderRequestDto foodOrderRequest1 = FoodOrderRequestDto.builder()
             .id(food2.id)
             .quantity(1)
             .build();
 
-        List<OrderLineInfo> foodOrderRequestDtos = new ArrayList<>();
+        List<FoodOrderRequestDto> foodOrderRequestDtos = new ArrayList<>();
         foodOrderRequestDtos.add(foodOrderRequest1);
 
         OrderRequestDto orderRequest = OrderRequestDto.builder()
@@ -364,8 +364,8 @@ class OrderIntegrationTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
+        assertEquals(1, response.getBody().length);
 
-        assertEquals(0, response.getBody().length);
         OrderDto orderDto = response.getBody()[0];
         // 음식점 이름
         assertEquals(registeredRestaurant.name, orderDto.restaurantName);
@@ -373,7 +373,7 @@ class OrderIntegrationTest {
         // 음식 주문 확인
         assertEquals(3, orderDto.foods.size());
         // 음식1 주문 확인
-        OrderFoodInfo foodOrder1 = orderDto.foods.stream()
+        FoodOrderDto foodOrder1 = orderDto.foods.stream()
             .filter(foodOrderDto -> foodOrderDto.name.equals(food1.getName()))
             .findAny().orElse(null);
         assertNotNull(foodOrder1);
@@ -381,7 +381,7 @@ class OrderIntegrationTest {
         assertEquals(foodOrder1.quantity, foodOrder1.quantity);
         assertEquals(10900, foodOrder1.price);
         // 음식2 주문 확인
-        OrderFoodInfo foodOrder2 = orderDto.foods.stream()
+        FoodOrderDto foodOrder2 = orderDto.foods.stream()
             .filter(foodOrderDto -> foodOrderDto.name.equals(food2.getName()))
             .findAny().orElse(null);
         assertNotNull(foodOrder2);
@@ -389,7 +389,7 @@ class OrderIntegrationTest {
         assertEquals(foodOrder2.quantity, foodOrder2.quantity);
         assertEquals(9800, foodOrder2.price);
         // 음식3 주문 확인
-        OrderFoodInfo foodOrder3 = orderDto.foods.stream()
+        FoodOrderDto foodOrder3 = orderDto.foods.stream()
             .filter(foodOrderDto -> foodOrderDto.name.equals(food3.getName()))
             .findAny().orElse(null);
         assertNotNull(foodOrder3);
@@ -409,13 +409,13 @@ class OrderIntegrationTest {
     @Builder
     static class OrderRequestDto {
         private Long restaurantId;
-        private List<OrderLineInfo> foods;
+        private List<FoodOrderRequestDto> foods;
     }
 
     @Getter
     @Setter
     @Builder
-    static class OrderLineInfo {
+    static class FoodOrderRequestDto {
         Long id;
         int quantity;
     }
@@ -424,14 +424,14 @@ class OrderIntegrationTest {
     @Setter
     static class OrderDto {
         private String restaurantName;
-        private List<OrderFoodInfo> foods;
+        private List<FoodOrderDto> foods;
         private int deliveryFee;
         private int totalPrice;
     }
 
     @Getter
     @Setter
-    static class OrderFoodInfo {
+    static class FoodOrderDto {
         String name;
         int quantity;
         int price;

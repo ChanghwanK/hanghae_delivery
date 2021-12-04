@@ -43,7 +43,7 @@ public class OrderService {
 
         List<OrderLine> orderLines = getOrderLines(orderRequestDto);
 
-        int totalPrice = getTotalPrice(orderLines);
+        int totalPrice = getTotalPrice(orderLines, restaurant.getDeliveryFee());
 
         Order order = createOrderAndSetRelation(totalPrice, restaurant, orderLines);
         orderRepository.save(order);
@@ -58,43 +58,43 @@ public class OrderService {
         List<Order> orders = orderRepository.findAll();
 
         for(Order order : orders) {
-            System.out.println(order);
             Restaurant restaurant = order.getRestaurant();
             int totalPrice = order.getTotalPrice();
+            int deliveryFee = restaurant.getDeliveryFee();
+
             List<OrderLine> orderLines = orderLineRepository.findAllByOrder(order);
             List<OrderFoodInfo> orderInfos = createOrderInfos(orderLines);
 
-            orderResponses.add(OrderResponse.of(restaurant, totalPrice, orderInfos));
+            orderResponses.add(OrderResponse.of(restaurant, totalPrice + deliveryFee, orderInfos));
         }
-        System.out.println(orderResponses);
+
         return orderResponses;
     }
 
-    private int getTotalPrice (List<OrderLine> orderLines) {
+    private int getTotalPrice (List<OrderLine> orderLines, int deliveryFee) {
         int totalPrice = 0;
 
         for(OrderLine orderLine : orderLines) {
-
             Long foodId = orderLine.getFoodId(); Food food = findFoodById(foodId);
             int orderLineUnitPrice = (food.getPrice() * orderLine.getQuantity());
             totalPrice += orderLineUnitPrice;
         }
-        return totalPrice;
+        return totalPrice + deliveryFee;
     }
 
     private List<OrderLine> getOrderLines (OrderRequestDto orderRequestDto) {
-        return orderRequestDto.getOrderLineInfos()
+        return orderRequestDto.getFoods()
             .stream()
             .map(OrderLine::of)
             .collect(Collectors.toList());
     }
 
 
-    private Order createOrderAndSetRelation (int totalPrice, Restaurant restaurant,
-        List<OrderLine> orderLines) {
+    private Order createOrderAndSetRelation (int totalPrice, Restaurant restaurant, List<OrderLine> orderLines) {
         Order order = Order.getDefaultOrderInstance();
-        order.setTotalPriceAndCheckTotalPriceIsValid(totalPrice);
-        order.setRelationWithOrderLines(orderLines); order.setRelationWithRestaurant(restaurant);
+        order.setTotalPriceAndCheckTotalPriceIsValid(totalPrice, restaurant.getMinOrderPrice());
+        order.setRelationWithOrderLines(orderLines);
+        order.setRelationWithRestaurant(restaurant);
         return order;
     }
 

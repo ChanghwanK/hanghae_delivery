@@ -26,24 +26,31 @@ public class FoodService {
 
 
     @Transactional
-    public void saveNewFoods (Long restaurantId, FoodRegistRequestDto foodSaveRequestDto) {
+    public void saveNewFoods (Long restaurantId, List<FoodRegistRequestDto> foodSaveRequestDtos) {
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
             .orElseThrow(RestaurantNotFoundException::new);
 
-        List<String> savedFoodNameListByRestaurantId = foodRepository.findFoodNameByRestaurantId(restaurantId);
+        List<String> savedFoodNameListByRestaurantId = foodRepository.findFoodNameByRestaurantId(
+            restaurantId);
+        List<String> requestFoodNames = new ArrayList<>();
 
-        int foodPrice = foodSaveRequestDto.getPrice();
-        String requestDtoFoodName = foodSaveRequestDto.getName();
+        for(FoodRegistRequestDto foodRegistRequestDto : foodSaveRequestDtos) {
+            requestFoodNames.add(foodRegistRequestDto.getName());
+        }
 
-        checkFoodName(savedFoodNameListByRestaurantId, requestDtoFoodName);
-        checkValidPrice(foodPrice);
-        checkMinOrderIs100unit(foodPrice);
+        findDuplicateFoodNames(requestFoodNames);
 
-        Food food = foodSaveRequestDto.toEntity();
+        for(FoodRegistRequestDto foodRegistRequestDto : foodSaveRequestDtos) {
+            int foodPrice = foodRegistRequestDto.getPrice();
+            String requestDtoFoodName = foodRegistRequestDto.getName();
 
-        food.registRestaurant(restaurant);
-        foodRepository.save(food);
+            checkFoodName(savedFoodNameListByRestaurantId, requestDtoFoodName);
+            checkValidPrice(foodPrice); checkMinOrderIs100unit(foodPrice);
+
+            Food food = foodRegistRequestDto.toEntity();
+            food.registRestaurant(restaurant); foodRepository.save(food);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -58,9 +65,7 @@ public class FoodService {
 //        return menuResponses;
         // 위와 동일한 코드 입니다. stream api를 공부하는 것도 좋은 학습이라 생각해서 작성해봤습니다.
         // of는 정적팩토리메서드 패턴 이라는 것을 활용했습니다 이펙티브 자바 책을 참고하면 좋습니다.
-        return foodRepository.findAllByRestaurantId(restaurantId)
-            .stream()
-            .map(FoodResponse::of)
+        return foodRepository.findAllByRestaurantId(restaurantId).stream().map(FoodResponse::of)
             .collect(Collectors.toList());
     }
 
@@ -80,9 +85,26 @@ public class FoodService {
 
     private void checkFoodName (List<String> foodNameListByRestaurantId, String foodName) {
         for(String foodNameByRestaurantId : foodNameListByRestaurantId) {
-            if (foodName.equals(foodNameByRestaurantId)) {
+            if(foodName.equals(foodNameByRestaurantId)) {
                 throw new FoodNameDuplicateException();
             }
         }
     }
+
+    private void findDuplicateFoodNames (List<String> requestFoodNames) {
+        for(int i = 0; i < requestFoodNames.size(); i++) {
+            String foodName_01 = requestFoodNames.get(i);
+            for(int j = 0; j < requestFoodNames.size(); j++) {
+                if(i == j) {
+                    continue;
+                }
+                String foodNames_02 = requestFoodNames.get(j);
+                if(foodName_01.equals(foodNames_02)) {
+                    throw new FoodNameDuplicateException();
+                }
+            }
+        }
+    }
 }
+
+
