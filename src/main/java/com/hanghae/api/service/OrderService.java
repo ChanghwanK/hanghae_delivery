@@ -4,6 +4,7 @@ import com.hanghae.api.dto.request.OrderRequestDto;
 import com.hanghae.api.dto.response.OrderFoodInfo;
 import com.hanghae.api.dto.response.OrderResponse;
 import com.hanghae.api.exception.FoodNotFoundException;
+import com.hanghae.api.exception.OrderQuantityValidException;
 import com.hanghae.api.exception.RestaurantNotFoundException;
 import com.hanghae.api.model.Food;
 import com.hanghae.api.model.Order;
@@ -37,14 +38,14 @@ public class OrderService {
     public OrderResponse registNewOrder (OrderRequestDto orderRequestDto) {
 
         Long restaurantId = orderRequestDto.getRestaurantId();
-
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
             .orElseThrow(RestaurantNotFoundException::new);
 
         List<OrderLine> orderLines = getOrderLines(orderRequestDto);
+        int totalPrice = getTotalPrice(orderLines);
 
-        int totalPrice = getTotalPrice(orderLines, restaurant.getDeliveryFee());
-
+        checkOrderRequestQuantity(orderLines);
+        checkOrderMinOrderPrice(totalPrice, restaurant.getMinOrderPrice());
         Order order = createOrderAndSetRelation(totalPrice, restaurant, orderLines);
         orderRepository.save(order);
 
@@ -60,18 +61,17 @@ public class OrderService {
         for(Order order : orders) {
             Restaurant restaurant = order.getRestaurant();
             int totalPrice = order.getTotalPrice();
-            int deliveryFee = restaurant.getDeliveryFee();
 
             List<OrderLine> orderLines = orderLineRepository.findAllByOrder(order);
             List<OrderFoodInfo> orderInfos = createOrderInfos(orderLines);
 
-            orderResponses.add(OrderResponse.of(restaurant, totalPrice + deliveryFee, orderInfos));
+            orderResponses.add(OrderResponse.of(restaurant, totalPrice, orderInfos));
         }
 
         return orderResponses;
     }
 
-    private int getTotalPrice (List<OrderLine> orderLines, int deliveryFee) {
+    private int getTotalPrice (List<OrderLine> orderLines) {
         int totalPrice = 0;
 
         for(OrderLine orderLine : orderLines) {
@@ -79,7 +79,7 @@ public class OrderService {
             int orderLineUnitPrice = (food.getPrice() * orderLine.getQuantity());
             totalPrice += orderLineUnitPrice;
         }
-        return totalPrice + deliveryFee;
+        return totalPrice;
     }
 
     private List<OrderLine> getOrderLines (OrderRequestDto orderRequestDto) {
@@ -106,8 +106,11 @@ public class OrderService {
         for(OrderLine orderLine : orderLines) {
             Long foodId = orderLine.getFoodId(); Food food = findFoodById(foodId);
 
-            OrderFoodInfo foodInfo = OrderFoodInfo.builder().name(food.getName())
-                .quantity(orderLine.getQuantity()).price(food.getPrice()).build();
+            OrderFoodInfo foodInfo = OrderFoodInfo.builder()
+                .name(food.getName())
+                .quantity(orderLine.getQuantity())
+                .price(food.getPrice() * orderLine.getQuantity())
+                .build();
 
             orderFoodInfos.add(foodInfo);
         }
@@ -117,5 +120,22 @@ public class OrderService {
 
     private Food findFoodById (Long foodId) {
         return foodRepository.findById(foodId).orElseThrow(FoodNotFoundException::new);
+    }
+
+    private void checkOrderRequestQuantity(List<OrderLine> orderLines) {
+        final int MAX_QUANTITY = 100;
+        final int MIN_QUANTITY = 0;
+        for (OrderLine orderLine : orderLines) {
+            int orderQuantity = orderLine.getQuantity();
+            if ( MIN_QUANTITY > orderQuantity || orderQuantity > MAX_QUANTITY) {
+                throw new OrderQuantityValidException();
+            }
+        }
+    }
+
+    private void checkOrderMinOrderPrice(int totalOrderPrice, int restaurantOrderMinPrice) {
+        if (totalOrderPrice < restaurantOrderMinPrice) {
+            throw new OrderQuantityValidException();
+        }
     }
 }

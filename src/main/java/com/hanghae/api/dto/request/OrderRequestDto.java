@@ -20,16 +20,19 @@ public class OrderRequestDto {
     @Getter
     public static class OrderLineInfo {
 
-        private final Long foodId;
+        private final Long id;
 
-        private final Integer quantity;
+        private final int quantity;
 
         public OrderLineInfo (Long foodId, Integer quantity) {
-            this.foodId = foodId; this.quantity = quantity;
+            this.id = foodId; this.quantity = quantity;
         }
 
         public OrderLine toEntity () {
-            return OrderLine.builder().foodId(foodId).quantity(quantity).build();
+            return OrderLine.builder()
+                .foodId(id)
+                .quantity(quantity)
+                .build();
         }
     }
 }

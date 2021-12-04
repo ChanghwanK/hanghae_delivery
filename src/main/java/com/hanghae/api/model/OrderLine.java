@@ -1,7 +1,6 @@
 package com.hanghae.api.model;
 
 import com.hanghae.api.dto.request.OrderRequestDto.OrderLineInfo;
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -12,7 +11,6 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 
 /**
  * @Created by Bloo
@@ -48,7 +46,7 @@ public class OrderLine {
 
     public static OrderLine of ( OrderLineInfo orderLineInfo) {
         return OrderLine.builder()
-            .foodId(orderLineInfo.getFoodId())
+            .foodId(orderLineInfo.getId())
             .quantity(orderLineInfo.getQuantity())
             .build();
     }

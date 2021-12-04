@@ -20,7 +20,7 @@ public class OrderResponse {
     private OrderResponse (Restaurant restaurant, int totalPrice) {
         this.restaurantName = restaurant.getName();
         this.deliveryFee = restaurant.getDeliveryFee();
-        this.totalPrice = totalPrice;
+        this.totalPrice = totalPrice + restaurant.getDeliveryFee();
     }
 
     public void setOrderFoodInfos (List<OrderFoodInfo> orderFoodInfos) {
