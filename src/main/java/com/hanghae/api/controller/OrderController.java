@@ -31,8 +31,7 @@ public class OrderController {
     }
 
     @GetMapping("/orders")
-    public ResponseEntity<List<OrderResponse>> findOrderById (
-        @PathVariable(name = "orderId") Long id) {
+    public ResponseEntity<List<OrderResponse>> findOrderById () {
         return ResponseEntity.ok().body(orderService.findAllOrder());
     }
 }

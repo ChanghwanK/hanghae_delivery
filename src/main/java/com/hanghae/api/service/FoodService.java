@@ -2,11 +2,15 @@ package com.hanghae.api.service;
 
 import com.hanghae.api.dto.request.FoodRegistRequestDto;
 import com.hanghae.api.dto.response.FoodResponse;
+import com.hanghae.api.exception.FoodNameDuplicateException;
+import com.hanghae.api.exception.FoodNotValidException;
+import com.hanghae.api.exception.MinOrderPriceIsNot100UnitException;
 import com.hanghae.api.exception.RestaurantNotFoundException;
 import com.hanghae.api.model.Food;
 import com.hanghae.api.model.Restaurant;
 import com.hanghae.api.repository.FoodRepository;
 import com.hanghae.api.repository.RestaurantRepository;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -22,21 +26,28 @@ public class FoodService {
 
 
     @Transactional
-    public void saveNewFoods (Long restaurantId, List<FoodRegistRequestDto> foodSaveRequestDtos) {
+    public void saveNewFoods (Long restaurantId, FoodRegistRequestDto foodSaveRequestDto) {
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
             .orElseThrow(RestaurantNotFoundException::new);
 
-        for (FoodRegistRequestDto foodRegistRequestDto : foodSaveRequestDtos) {
-            Food food = foodRegistRequestDto.toEntity();
-            food.registRestaurant(restaurant);
-            foodRepository.save(food);
-        }
+        List<String> savedFoodNameListByRestaurantId = foodRepository.findFoodNameByRestaurantId(restaurantId);
+
+        int foodPrice = foodSaveRequestDto.getPrice();
+        String requestDtoFoodName = foodSaveRequestDto.getName();
+
+        checkFoodName(savedFoodNameListByRestaurantId, requestDtoFoodName);
+        checkValidPrice(foodPrice);
+        checkMinOrderIs100unit(foodPrice);
+
+        Food food = foodSaveRequestDto.toEntity();
+
+        food.registRestaurant(restaurant);
+        foodRepository.save(food);
     }
 
-
     @Transactional(readOnly = true)
-    public List<FoodResponse> findMenusByRestaurantId(Long restaurantId) {
+    public List<FoodResponse> findMenusByRestaurantId (Long restaurantId) {
 //        List<Food> foods = foodRepository.findAllByRestaurantId(restaurantId);
 //        ArrayList<MenuResponse> menuResponses = new ArrayList<>();
 //        for (Food food : foods) {
@@ -51,5 +62,27 @@ public class FoodService {
             .stream()
             .map(FoodResponse::of)
             .collect(Collectors.toList());
+    }
+
+    private void checkValidPrice (int price) {
+        if(price < 100 || price > 1000000) {
+            throw new FoodNotValidException();
+        }
+    }
+
+    private void checkMinOrderIs100unit (int foodPrice) {
+        int price = foodPrice;
+
+        if((price % 100) != 0) {
+            throw new MinOrderPriceIsNot100UnitException();
+        }
+    }
+
+    private void checkFoodName (List<String> foodNameListByRestaurantId, String foodName) {
+        for(String foodNameByRestaurantId : foodNameListByRestaurantId) {
+            if (foodName.equals(foodNameByRestaurantId)) {
+                throw new FoodNameDuplicateException();
+            }
+        }
     }
 }

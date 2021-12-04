@@ -2,16 +2,11 @@ package com.hanghae.api.dto.response;
 
 import com.hanghae.api.exception.OrderInfoIsEmptyException;
 import com.hanghae.api.model.Restaurant;
-import java.util.ArrayList;
 import java.util.List;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-/**
- * @Created by Bloo
- * @Date: 2021/11/28
- */
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Getter

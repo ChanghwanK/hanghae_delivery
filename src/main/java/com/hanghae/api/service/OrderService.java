@@ -1,7 +1,6 @@
 package com.hanghae.api.service;
 
 import com.hanghae.api.dto.request.OrderRequestDto;
-import com.hanghae.api.dto.response.OrderFindResponse;
 import com.hanghae.api.dto.response.OrderFoodInfo;
 import com.hanghae.api.dto.response.OrderResponse;
 import com.hanghae.api.exception.FoodNotFoundException;
@@ -49,12 +48,7 @@ public class OrderService {
         Order order = createOrderAndSetRelation(totalPrice, restaurant, orderLines);
         orderRepository.save(order);
 
-
-        return OrderResponse.of(
-            restaurant,
-            totalPrice,
-            createOrderInfos(orderLines)
-        );
+        return OrderResponse.of(restaurant, totalPrice, createOrderInfos(orderLines));
     }
 
     @Transactional(readOnly = true)
@@ -64,7 +58,7 @@ public class OrderService {
         List<Order> orders = orderRepository.findAll();
 
         for(Order order : orders) {
-
+            System.out.println(order);
             Restaurant restaurant = order.getRestaurant();
             int totalPrice = order.getTotalPrice();
             List<OrderLine> orderLines = orderLineRepository.findAllByOrder(order);
@@ -72,7 +66,7 @@ public class OrderService {
 
             orderResponses.add(OrderResponse.of(restaurant, totalPrice, orderInfos));
         }
-
+        System.out.println(orderResponses);
         return orderResponses;
     }
 
@@ -82,21 +76,22 @@ public class OrderService {
         for(OrderLine orderLine : orderLines) {
 
             Long foodId = orderLine.getFoodId(); Food food = findFoodById(foodId);
-
             int orderLineUnitPrice = (food.getPrice() * orderLine.getQuantity());
             totalPrice += orderLineUnitPrice;
-        } return totalPrice;
+        }
+        return totalPrice;
     }
 
     private List<OrderLine> getOrderLines (OrderRequestDto orderRequestDto) {
-        return orderRequestDto.getOrderFoodInfos()
+        return orderRequestDto.getOrderLineInfos()
             .stream()
             .map(OrderLine::of)
             .collect(Collectors.toList());
     }
 
 
-    private Order createOrderAndSetRelation (int totalPrice, Restaurant restaurant, List<OrderLine> orderLines) {
+    private Order createOrderAndSetRelation (int totalPrice, Restaurant restaurant,
+        List<OrderLine> orderLines) {
         Order order = Order.getDefaultOrderInstance();
         order.setTotalPriceAndCheckTotalPriceIsValid(totalPrice);
         order.setRelationWithOrderLines(orderLines); order.setRelationWithRestaurant(restaurant);

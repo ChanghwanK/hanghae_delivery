@@ -14,6 +14,7 @@ import org.springframework.http.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -94,9 +95,11 @@ class FoodIntegrationTest {
         registeredRestaurant = restaurantResponse;
     }
 
+
     @Nested
     @DisplayName("음식점에 음식 3개 등록 및 메뉴판 조회")
     class RegisterRestaurants {
+
         @Test
         @Order(1)
         @DisplayName("음식 1개 등록")
@@ -207,6 +210,7 @@ class FoodIntegrationTest {
     }
 
     @Nested
+    @Transactional
     @DisplayName("음식명")
     class FoodName {
         @Test
@@ -282,6 +286,7 @@ class FoodIntegrationTest {
                 request,
                 Object.class);
 
+            System.out.println("result code = " + response.getStatusCode());
             // then
             assertTrue(
                 response.getStatusCode() == HttpStatus.BAD_REQUEST
@@ -332,6 +337,7 @@ class FoodIntegrationTest {
     }
 
     @Nested
+    @Transactional
     @DisplayName("음식 가격")
     class FoodPrice {
         @Test
@@ -358,7 +364,7 @@ class FoodIntegrationTest {
                 "/restaurant/" + restaurantId + "/food/register",
                 request,
                 Object.class);
-
+            System.out.println(response);
             // then
             assertTrue(
                 response.getStatusCode() == HttpStatus.BAD_REQUEST

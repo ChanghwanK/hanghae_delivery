@@ -4,7 +4,6 @@ import com.hanghae.api.dto.request.FoodRegistRequestDto;
 import com.hanghae.api.dto.response.FoodResponse;
 import com.hanghae.api.service.FoodService;
 import java.util.List;
-import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,17 +25,18 @@ public class FoodController {
 
     @PostMapping("/restaurant/{restaurantId}/food/register")
     public ResponseEntity<Void> registRestaurantFood (@PathVariable Long restaurantId,
-        @Valid @RequestBody List<FoodRegistRequestDto> foodRegistRequestDtos) {
+        @RequestBody List<FoodRegistRequestDto> foodRegistRequestDtos) {
 
-        foodService.saveNewFoods(restaurantId, foodRegistRequestDtos);
+        for(FoodRegistRequestDto foodRegistRequestDto : foodRegistRequestDtos) {
+            foodService.saveNewFoods(restaurantId, foodRegistRequestDto);
+        }
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/restaurant/{restaurantId}/foods")
-    public ResponseEntity<FoodResponse> findMenusByRestaurantId (@PathVariable Long restaurantId) {
-
-        return null;
+    public ResponseEntity<List<FoodResponse>> findMenusByRestaurantId (@PathVariable Long restaurantId) {
+        return ResponseEntity.ok().body(foodService.findMenusByRestaurantId(restaurantId));
     }
 
 }

@@ -1,14 +1,19 @@
 package com.hanghae.api.dto.response;
 
 import com.hanghae.api.model.Food;
+import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 /**
  * @Created by Bloo
  * @Date: 2021/12/03
  */
 
-
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class FoodResponse {
 
     private Long id;
@@ -21,7 +26,10 @@ public class FoodResponse {
     }
 
     public static FoodResponse of (Food food) {
-        return FoodResponse.builder().id(food.getId()).name(food.getName()).price(food.getPrice())
+        return FoodResponse.builder()
+            .id(food.getId())
+            .name(food.getName())
+            .price(food.getPrice())
             .build();
     }
 }

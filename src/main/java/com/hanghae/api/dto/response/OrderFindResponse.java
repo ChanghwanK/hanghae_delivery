@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
  */
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class OrderFindResponse {
 
     private Long orderId;

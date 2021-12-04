@@ -33,7 +33,7 @@ public class Order {
     @ManyToOne(fetch = FetchType.LAZY)
     private Restaurant restaurant;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "orderId", cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "order", cascade = CascadeType.ALL)
     private final List<OrderLine> orderLines = new ArrayList<>();
 
     public static Order getDefaultOrderInstance () {

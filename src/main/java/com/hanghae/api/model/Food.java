@@ -49,4 +49,5 @@ public class Food extends BaseTimeEntity {
     public void registRestaurant(Restaurant restaurant) {
         this.restaurant = restaurant;
     }
+
 }
