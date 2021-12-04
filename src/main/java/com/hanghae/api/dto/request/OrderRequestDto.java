@@ -16,7 +16,7 @@ import org.hibernate.validator.constraints.Range;
 public class OrderRequestDto {
 
     private Long restaurantId;
-    private List<OrderLineInfo> orderFoodInfos;
+    private List<OrderLineInfo> orderLineInfos;
 
     @Getter
     public static class OrderLineInfo {

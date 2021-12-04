@@ -2,6 +2,7 @@ package com.hanghae.api.dto.response;
 
 import lombok.AccessLevel;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
  */
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@Getter
 public class OrderFoodInfo {
 
     private String name;

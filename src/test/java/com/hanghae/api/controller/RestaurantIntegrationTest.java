@@ -202,7 +202,6 @@ class RestaurantIntegrationTest {
                 request,
                 RestaurantDto.class);
 
-            System.out.println(response);
             // then
             assertTrue(
                 response.getStatusCode() == HttpStatus.BAD_REQUEST
